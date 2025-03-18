@@ -3,6 +3,7 @@ package edu.poly.chatapp.adapters;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -15,7 +16,7 @@ import edu.poly.chatapp.databinding.ItemContainerUserBinding;
 import edu.poly.chatapp.listeners.UserListener;
 import edu.poly.chatapp.models.User;
 
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder>{
+public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
     private final List<User> users;
     private final UserListener userListener;
 
@@ -48,20 +49,26 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     class UserViewHolder extends RecyclerView.ViewHolder {
         ItemContainerUserBinding binding;
 
-        UserViewHolder(ItemContainerUserBinding itemContainerUserBinding){
+        UserViewHolder(ItemContainerUserBinding itemContainerUserBinding) {
             super(itemContainerUserBinding.getRoot());
             binding = itemContainerUserBinding;
         }
 
-        void setUserData(User user){
+        void setUserData(User user) {
             binding.textName.setText(user.name);
             binding.textEmail.setText(user.email);
-            binding.imageProfile.setImageBitmap(getUserImage(user.image));
+            // todo: trying to fix byte array exception
+            try {
+                binding.imageProfile.setImageBitmap(getUserImage(user.image));
+            } catch (Exception e) {
+                Log.d("TAG", "Can not load image of other user");
+            }
             binding.getRoot().setOnClickListener(v -> userListener.onUserClick(user));
         }
     }
-    private Bitmap getUserImage(String encodedImage){
-        byte[] bytes = Base64.decode(encodedImage,Base64.DEFAULT);
+
+    private Bitmap getUserImage(String encodedImage) {
+        byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         int width = 150;
         int height = 150;

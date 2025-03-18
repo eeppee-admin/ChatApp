@@ -1,7 +1,9 @@
 package edu.poly.chatapp.activities;
 
 import edu.poly.chatapp.databinding.ActivityChatBinding;
+
 import android.os.Bundle;
+
 import edu.poly.chatapp.models.User;
 import edu.poly.chatapp.network.ApiClient;
 import edu.poly.chatapp.network.ApiService;
@@ -11,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import android.util.Base64;
+
 import edu.poly.chatapp.utilities.PreferenceManager;
 import edu.poly.chatapp.adapters.ChatAdapter;
 
@@ -20,8 +23,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -60,6 +66,7 @@ public class ChatActivity extends BaseActivity {
     private FirebaseFirestore database;
     private String conversionId = null;
     private Boolean isReceiverAvailable = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +89,7 @@ public class ChatActivity extends BaseActivity {
         binding.chatRecycleView.setAdapter(chatAdapter);
         database = FirebaseFirestore.getInstance();
     }
+
     private Bitmap getBitmapFromEncodedString(String encodedImage) {
         if (encodedImage != null) {
             byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
@@ -90,6 +98,7 @@ public class ChatActivity extends BaseActivity {
             return null;
         }
     }
+
     private void loadReceiverDetails() {
         receiverUser = (User) getIntent().getSerializableExtra(Constants.KEY_USER);
         assert receiverUser != null;
@@ -157,11 +166,15 @@ public class ChatActivity extends BaseActivity {
                 if (response.isSuccessful()) {
                     try {
                         if (response.body() != null) {
-                            JSONObject responseJson  = new JSONObject(response.body());
+                            JSONObject responseJson = new JSONObject(response.body());
                             JSONArray results = responseJson.getJSONArray("results");
                             if (responseJson.getInt("failure") == 1) {
                                 JSONObject error = (JSONObject) results.get(0);
-                                showToast(error.getString("error"));
+                                // log print:  tagSocket(76) with statsTag=0xffffffff, statsUid=-1
+                                Log.d("TAG", results.toString());
+                                Log.d("TAG", response.body());
+                                // todo: suppress error
+//                                showToast(error.getString("error"));
                                 return;
                             }
                         }
@@ -220,6 +233,7 @@ public class ChatActivity extends BaseActivity {
                 .whereEqualTo(Constants.KEY_RECEIVER_ID, preferenceManager.getString(Constants.KEY_USER_ID))
                 .addSnapshotListener(eventListener);
     }
+
     private final EventListener<QuerySnapshot> eventListener = (value, error) -> {
         if (error != null) {
             return;
@@ -270,6 +284,7 @@ public class ChatActivity extends BaseActivity {
                 Constants.KEY_TIMESTAMP, new Date()
         );
     }
+
     private void checkForConversion() {
         if (chatMessages.size() != 0) {
             checkForConversionRemotely(
@@ -282,6 +297,7 @@ public class ChatActivity extends BaseActivity {
             );
         }
     }
+
     private void checkForConversionRemotely(String senderId, String receiverId) {
         database.collection(Constants.KEY_COLLECTION_CONVERSATIONS)
                 .whereEqualTo(Constants.KEY_SENDER_ID, senderId)
@@ -289,6 +305,7 @@ public class ChatActivity extends BaseActivity {
                 .get()
                 .addOnCompleteListener(conversionOnCompleteListener);
     }
+
     private final OnCompleteListener<QuerySnapshot> conversionOnCompleteListener = task -> {
         if (task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0) {
             DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);

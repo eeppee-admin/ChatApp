@@ -24,6 +24,7 @@ import edu.poly.chatapp.activities.ChatActivity;
 import edu.poly.chatapp.models.User;
 import edu.poly.chatapp.utilities.Constants;
 
+// 消息推送服务
 public class MessagingService extends FirebaseMessagingService {
 
     @Override
