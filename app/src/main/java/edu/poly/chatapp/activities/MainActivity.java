@@ -9,11 +9,14 @@ import android.util.Base64;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -49,6 +52,8 @@ public class MainActivity extends BaseActivity implements ConversionListener {
         getToken();
         setListeners();
         listenConversations();
+
+//        deleteAllCollections();
     }
 
 
@@ -60,6 +65,7 @@ public class MainActivity extends BaseActivity implements ConversionListener {
                 .whereEqualTo(Constants.KEY_RECEIVER_ID, preferenceManager.getString(Constants.KEY_USER_ID))
                 .addSnapshotListener(eventListener);
     }
+
     private final EventListener<QuerySnapshot> eventListener = (value, error) -> {
         if (error != null) {
             return;
@@ -88,10 +94,14 @@ public class MainActivity extends BaseActivity implements ConversionListener {
                     for (int i = 0; i < conversations.size(); i++) {
                         String senderId = documentChange.getDocument().getString(Constants.KEY_SENDER_ID);
                         String receiverId = documentChange.getDocument().getString(Constants.KEY_RECEIVER_ID);
-                        if (conversations.get(i).senderId.equals(senderId) && conversations.get(i).receiverId.equals(receiverId)) {
-                            conversations.get(i).message = documentChange.getDocument().getString(Constants.KEY_LAST_MESSAGE);
-                            conversations.get(i).dateObject = documentChange.getDocument().getDate(Constants.KEY_TIMESTAMP);
-                            break;
+                        try {
+                            if (conversations.get(i).senderId.equals(senderId) && conversations.get(i).receiverId.equals(receiverId)) {
+                                conversations.get(i).message = documentChange.getDocument().getString(Constants.KEY_LAST_MESSAGE);
+                                conversations.get(i).dateObject = documentChange.getDocument().getDate(Constants.KEY_TIMESTAMP);
+                                break;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -114,17 +124,37 @@ public class MainActivity extends BaseActivity implements ConversionListener {
             binding.progressBar.setVisibility(View.GONE);
         }
     };
+
     private void init() {
         conversations = new ArrayList<>();
         conversationsAdapter = new RecentConversationsAdapter(conversations, this);
         binding.conversationRecycleView.setAdapter(conversationsAdapter);
         database = FirebaseFirestore.getInstance();
     }
+
     private void setListeners() {
-        binding.imageSignOut.setOnClickListener(v -> signOut());
+        binding.imageSignOut.setOnClickListener(v ->
+                showSignOutDialog()
+        );
         binding.fabNewChat.setOnClickListener(v ->
-            startActivity(new Intent(getApplicationContext(), UsersActivity.class)));
+                startActivity(new Intent(getApplicationContext(), UsersActivity.class)));
     }
+
+    private void showSignOutDialog() {
+        // 使用AlertDialog.Builder来构建对话框
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("退出程序?") // 设置对话框标题
+                .setMessage("确定要退出程序吗？退出程序默认不会自动填充账号密码,需要用户自己保存记录账号密码!!!")
+                .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
+                .setPositiveButton("确定", (dialog, which) -> {
+                    signOut();
+                });
+
+        // 创建并显示对话框
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     private void loadUserDetails() {
         binding.textName.setText(preferenceManager.getString(Constants.KEY_NAME));
         byte[] bytes = Base64.decode(preferenceManager.getString(Constants.KEY_IMAGE), Base64.DEFAULT);
@@ -135,7 +165,6 @@ public class MainActivity extends BaseActivity implements ConversionListener {
     private void showToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
-
 
 
     private void getToken() {
@@ -176,5 +205,36 @@ public class MainActivity extends BaseActivity implements ConversionListener {
         Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
         intent.putExtra(Constants.KEY_USER, user);
         startActivity(intent);
+    }
+
+    private void deleteAllCollections() {
+        // 确认对话框
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle("确认删除所有数据")
+//                .setMessage("这将删除 Firestore 中的所有数据，确定要继续吗？你只能清除本应用全部数据才能再次使用")
+//                .setPositiveButton("确定", (dialog, which) -> {
+        // 删除所有集合
+        deleteCollection(Constants.KEY_COLLECTION_CONVERSATIONS);
+        deleteCollection(Constants.KEY_COLLECTION_CHAT);
+        deleteCollection(Constants.KEY_COLLECTION_USERS);
+        // 其他集合...
+        showToast("所有数据已删除");
+//                })
+//                .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
+//                .show();
+    }
+
+    private void deleteCollection(String collectionPath) {
+        database.collection(collectionPath)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            document.getReference().delete();
+                        }
+                    } else {
+                        showToast("删除集合失败: " + task.getException().getMessage());
+                    }
+                });
     }
 }

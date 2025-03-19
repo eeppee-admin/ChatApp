@@ -16,6 +16,7 @@ import edu.poly.chatapp.databinding.ItemContainerUserBinding;
 import edu.poly.chatapp.listeners.UserListener;
 import edu.poly.chatapp.models.User;
 
+// 用户适配器
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
     private final List<User> users;
     private final UserListener userListener;

@@ -13,6 +13,7 @@ import edu.poly.chatapp.databinding.ItemContainerReceivedMessageBinding;
 import edu.poly.chatapp.databinding.ItemContainerSentMessageBinding;
 import edu.poly.chatapp.models.ChatMessage;
 
+// 聊天适配器
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final List<ChatMessage> chatMessages;

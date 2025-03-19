@@ -17,6 +17,7 @@ import edu.poly.chatapp.listeners.ConversionListener;
 import edu.poly.chatapp.models.ChatMessage;
 import edu.poly.chatapp.models.User;
 
+// 最近会话适配器
 public class RecentConversationsAdapter extends RecyclerView.Adapter<RecentConversationsAdapter.ConversionViewHolder> {
 
     private final List<ChatMessage> chatMessages;

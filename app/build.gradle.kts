@@ -10,7 +10,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "edu.poly.chatapp"
+        applicationId = "com.example.firebase_chatapp"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

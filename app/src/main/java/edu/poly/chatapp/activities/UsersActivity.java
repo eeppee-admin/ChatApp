@@ -79,6 +79,7 @@ public class UsersActivity extends BaseActivity implements UserListener {
         binding.textErrorMessage.setVisibility(View.VISIBLE);
     }
 
+    // 加载
     private void loading(Boolean isLoading) {
         if (isLoading)
             binding.progressBar.setVisibility(View.VISIBLE);

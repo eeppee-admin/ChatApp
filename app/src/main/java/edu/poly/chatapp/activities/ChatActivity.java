@@ -2,6 +2,7 @@ package edu.poly.chatapp.activities;
 
 import edu.poly.chatapp.databinding.ActivityChatBinding;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import edu.poly.chatapp.models.User;
@@ -32,6 +33,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.DocumentChange;
@@ -108,6 +110,27 @@ public class ChatActivity extends BaseActivity {
     private void setListeners() {
         binding.imageBack.setOnClickListener(v -> onBackPressed());
         binding.layoutSend.setOnClickListener(v -> sendMessage());
+        binding.imageInfo.setOnClickListener(v -> {
+            showInfoDialog();
+        });
+    }
+
+    private void showInfoDialog() {
+        // 使用AlertDialog.Builder来构建对话框
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("关于本应用") // 设置对话框标题
+                .setMessage("应用名称：firebase_app\n版本：0.0.1\n开发者：eeppee_admin aka. fuckerfucker\n描述：这是一个文字firebase单聊示例应用。\nhttps://github.com/eeppee_admin/") // 设置对话框内容
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 点击确定按钮后的操作，这里只是关闭对话框
+                        dialog.dismiss();
+                    }
+                });
+
+        // 创建并显示对话框
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void sendMessage() {
@@ -156,6 +179,7 @@ public class ChatActivity extends BaseActivity {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
+    // 这里发送FCM通知
     private void sendNotification(String messageBody) {
         ApiClient.getClient().create(ApiService.class).sendMessage(
                 Constants.getRemoteMsgHeaders(),
@@ -183,7 +207,7 @@ public class ChatActivity extends BaseActivity {
                     }
                     showToast("Notification sent successfully");
                 } else {
-                    showToast("Error: " + response.code());
+//                    showToast("Error: " + response.code());
                 }
             }
 
@@ -195,32 +219,35 @@ public class ChatActivity extends BaseActivity {
     }
 
     private void listenAvailabilityOfReceiver() {
-        database.collection(Constants.KEY_COLLECTION_USERS).document(
-                receiverUser.id
-        ).addSnapshotListener(ChatActivity.this, (value, error) -> {
-            if (error != null) {
-                return;
-            }
-            if (value != null) {
-                if (value.getLong(Constants.KEY_AVAILABILITY) != null) {
-                    int availability = Objects.requireNonNull(
-                            value.getLong(Constants.KEY_AVAILABILITY)
-                    ).intValue();
-                    isReceiverAvailable = availability == 1;
+        if (receiverUser.id != null) {
+
+            database.collection(Constants.KEY_COLLECTION_USERS).document(
+                    receiverUser.id
+            ).addSnapshotListener(ChatActivity.this, (value, error) -> {
+                if (error != null) {
+                    return;
                 }
-                receiverUser.token = value.getString(Constants.KEY_FCM_TOKEN);
-                if (receiverUser.image == null) {
-                    receiverUser.image = value.getString(Constants.KEY_IMAGE);
-                    chatAdapter.setReceiverProfileImage(getBitmapFromEncodedString(receiverUser.image));
-                    chatAdapter.notifyItemRangeChanged(0, chatMessages.size());
+                if (value != null) {
+                    if (value.getLong(Constants.KEY_AVAILABILITY) != null) {
+                        int availability = Objects.requireNonNull(
+                                value.getLong(Constants.KEY_AVAILABILITY)
+                        ).intValue();
+                        isReceiverAvailable = availability == 1;
+                    }
+                    receiverUser.token = value.getString(Constants.KEY_FCM_TOKEN);
+                    if (receiverUser.image == null) {
+                        receiverUser.image = value.getString(Constants.KEY_IMAGE);
+                        chatAdapter.setReceiverProfileImage(getBitmapFromEncodedString(receiverUser.image));
+                        chatAdapter.notifyItemRangeChanged(0, chatMessages.size());
+                    }
                 }
-            }
-            if (isReceiverAvailable) {
-                binding.textAvailability.setVisibility(View.VISIBLE);
-            } else {
-                binding.textAvailability.setVisibility(View.GONE);
-            }
-        });
+                if (isReceiverAvailable) {
+                    binding.textAvailability.setVisibility(View.VISIBLE);
+                } else {
+                    binding.textAvailability.setVisibility(View.GONE);
+                }
+            });
+        }
     }
 
     private void listenMessages() {

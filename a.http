@@ -1,0 +1,39 @@
+POST https://fcm.googleapis.com/fcm/sent
+###
+POST https://fcm.googleapis.com/v1/projects/myapplication/messages:send
+Content-Type: application/json
+Authorization: Bear e8rNYw7kRQGZrfpYhAiUJi:APA91bGOY6l7XwhFXYrhmq6ycFTAqtAX7iNdXzQciepzVedeeHF4sW2ib4JFawiCPAQCYinR6FeQLo1_DyIhk9uozKiJv5ha0QftfqLSYbm2LzEB27y7j0E
+
+{ 
+	"message": {
+		"token": "e8rNYw7kRQGZrfpYhAiUJi:APA91bGOY6l7XwhFXYrhmq6ycFTAqtAX7iNdXzQciepzVedeeHF4sW2ib4JFawiCPAQCYinR6FeQLo1_DyIhk9uozKiJv5ha0QftfqLSYbm2LzEB27y7j0E"
+		"topic": "news",
+		"notification": {
+			"title": "Breaking News",
+			"body": "New news story available."
+		},
+		"data": {
+			"story_id": "story_12345"
+		}
+	}
+}
+
+###
+POST https://oauth2.googleapis.com/token?scope=https%3A//www.googleapis.com/auth/drive.metadata.readonly&include_granted_scopes=true&response_type=token&state=state_parameter_passthrough_value&redirect_uri=https%3A//oauth2.example.com/code&client_id=117174213134538164171& scope=https%3A//www.googleapis.com/auth/drive.metadata.readonly%20https%3A//www.googleapis.com/auth/calendar.readonly&response_type=token&grant_type=password
+
+# 作者：蓝屏的钙
+# 链接：https://juejin.cn/post/7264168916291960869
+# 来源：稀土掘金
+# 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+###
+POST https://oauth2.googleapis.com/token?client_id=1061803375625-5am1fea0fopls7jl2hnqd8po1mfph9pt.apps.googleusercontent.com&client_secret=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&include_granted_scopes=true
+Content-Type: application/x-www-form-urlencoded
+
+
+
+# &refresh_token=YOUR_REFRESH_TOKEN&grant_type=refresh_token
+
+
+###
+POST https://accounts.google.com/o/oauth2/v2/auth?scope=email%20profile&response_type=code&state=security_token%3D138r5719ru3e1%26url%3Dhttps%3A%2F%2Foauth2.example.com%2Ftoken&client_id=1061803375625-5am1fea0fopls7jl2hnqd8po1mfph9pt.apps.googleusercontent.com

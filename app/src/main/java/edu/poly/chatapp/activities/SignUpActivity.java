@@ -49,6 +49,7 @@ public class SignUpActivity extends AppCompatActivity {
                 signUp();
             }
         });
+        // 选择图片
         binding.layoutImage.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -115,6 +116,7 @@ public class SignUpActivity extends AppCompatActivity {
                 }
             }
     );
+    
     private Boolean isValidSignUpDetailed() {
         if (encodedImage == null) {
             showToast("Select profile image");
